@@ -9,7 +9,6 @@ import Final.Project.dodo.model.mapper.OrderProductMapper;
 import Final.Project.dodo.model.request.create.OrderProductCreateRequest;
 import Final.Project.dodo.model.request.update.OrderProductUpdateRequest;
 import Final.Project.dodo.service.OrderProductService;
-import Final.Project.dodo.service.OrderService;
 import Final.Project.dodo.service.ProductService;
 import Final.Project.dodo.service.ProductSizeService;
 import org.springframework.stereotype.Service;
@@ -53,6 +52,6 @@ public class OrderProductServiceImpl extends BaseServiceImpl<OrderProduct, Order
 
     @Override
     public List<OrderProductDto> findAllByOrderId(Long id) {
-        return rep.findAllByOrderId(id);
+        return mapper.toDtos(rep.findAllByOrderId(id), context);
     }
 }

@@ -2,6 +2,7 @@ package Final.Project.dodo.controller;
 
 
 import Final.Project.dodo.model.dto.OrderDto;
+import Final.Project.dodo.model.request.RepeatOrderRequest;
 import Final.Project.dodo.model.request.create.OrderCreateRequest;
 import Final.Project.dodo.model.request.update.OrderUpdateRequest;
 import Final.Project.dodo.service.OrderService;
@@ -19,8 +20,14 @@ public class OrderController {
     private final OrderService service;
 
     @PostMapping("save")
-    public ResponseEntity<?> save(@RequestBody OrderCreateRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<?> save(@RequestHeader String accessToken,
+            @RequestBody OrderCreateRequest request) {
+        return ResponseEntity.ok(service.create(accessToken, request));
+    }
+    @PostMapping("repeatOrder")
+    public ResponseEntity<?> repeatOrder(@RequestHeader String accessToken,
+                                  @RequestBody RepeatOrderRequest request) {
+        return ResponseEntity.ok(service.repeatOrder(accessToken, request));
     }
 
     @PostMapping("update")
@@ -41,6 +48,11 @@ public class OrderController {
     @GetMapping("getById")
     public ResponseEntity<OrderDto> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.findById(id));
+    }
+
+    @GetMapping("HistoryOfOrder")
+    public ResponseEntity<?> getHistoryByUserId(@RequestHeader String token) {
+        return ResponseEntity.ok(service.getByUserId(token));
     }
 }
 

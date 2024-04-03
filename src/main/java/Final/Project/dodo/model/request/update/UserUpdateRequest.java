@@ -15,5 +15,5 @@ public class UserUpdateRequest {
     String name;
     String email;
     String phone;
-    Double dodoCoins;
+    Integer dodoCoins;
 }

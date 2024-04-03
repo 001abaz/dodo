@@ -2,6 +2,7 @@ package Final.Project.dodo.model.entities;
 
 import Final.Project.dodo.base.BaseEntity;
 import Final.Project.dodo.model.enums.OrderStatus;
+import Final.Project.dodo.model.enums.PaymentType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,21 +22,31 @@ public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
+
     @Column(name = "total_price")
     BigDecimal totalPrice;
+
     @Column(name = "dodo_coins")
     BigDecimal dodoCoins;
+
     @Column(name = "order_date")
     LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
     OrderStatus orderStatus;
+
     @Column(name = "payment_type")
-    Boolean paymentType;
+    @Enumerated(EnumType.STRING)
+    PaymentType paymentType;
+
     @Column(name = "discount")
     BigDecimal discount;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
+
     @ManyToOne
     @JoinColumn(name = "address_id")
     Address address;

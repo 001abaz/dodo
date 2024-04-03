@@ -13,4 +13,6 @@ public interface UserService extends BaseService<UserDto> {
     Boolean delete(Long id);
     Boolean checkByEmail(String email);
     UserDto findByEmail(String email);
+
+
 }

@@ -13,7 +13,7 @@ public interface UserGetProjection {
     String getName();
     String getEmail();
     String getPhone();
-    Double getDodoCoins();
+    Integer getDodoCoins();
     String getTemp_password();
     String getPassword();
 }

@@ -25,6 +25,10 @@ public abstract class BaseEntity {
 
     @PreUpdate
     protected void onUpdate() {
+        addDate = getAddDate();
         updateDate = LocalDateTime.now();
+        if (status == null){
+            status = getStatus();
+        }
     }
 }

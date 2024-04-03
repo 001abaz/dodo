@@ -2,6 +2,7 @@ package Final.Project.dodo.service.impl;
 
 import Final.Project.dodo.base.BaseServiceImpl;
 import Final.Project.dodo.dao.AddressRep;
+import Final.Project.dodo.dao.projection.AddressResponse;
 import Final.Project.dodo.model.dto.AddressDto;
 import Final.Project.dodo.model.entities.Address;
 import Final.Project.dodo.model.mapper.AddressMapper;
@@ -45,13 +46,16 @@ public class AddressServiceImpl extends BaseServiceImpl<Address, AddressRep, Add
         dto.setUser(userService.findById(request.getUserId()));
         return update(dto);
 
-
-
     }
 
     @Override
     public Boolean delete(Long id) {
         AddressDto dto = findById(id);
         return delete(dto);
+    }
+
+    @Override
+    public AddressResponse findByAddressId(Long id) {
+        return rep.findByAddressId(id);
     }
 }

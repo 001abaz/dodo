@@ -2,6 +2,7 @@ package Final.Project.dodo.model.dto;
 
 import Final.Project.dodo.base.BaseDto;
 import Final.Project.dodo.model.enums.OrderStatus;
+import Final.Project.dodo.model.enums.PaymentType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,10 +17,10 @@ import java.time.LocalDateTime;
 @ToString
 public class OrderDto extends BaseDto {
     BigDecimal totalPrice;
-    BigDecimal dodoCoins;
+    Integer dodoCoins;
     LocalDateTime orderDate;
     OrderStatus orderStatus;
-    Boolean paymentType;
+    PaymentType paymentType;
     BigDecimal discount;
     UserDto user;
     AddressDto address;

@@ -1,6 +1,5 @@
 package Final.Project.dodo.model.request.create;
 
-import jakarta.persistence.Column;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +14,4 @@ public class UserCreateRequest {
     String name;
     String email;
     String phone;
-    Double dodoCoins;
 }

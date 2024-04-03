@@ -1,7 +1,7 @@
 package Final.Project.dodo.model.enums;
 
 public enum OrderStatus {
-    CREATED("Создан"),
+    NEW("Новый"),
     PREPARING("Готовится"),
     DELIVERING("Доставляется"),
     DELIVERED("Доставлен"),

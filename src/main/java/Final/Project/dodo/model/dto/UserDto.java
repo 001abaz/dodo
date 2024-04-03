@@ -14,7 +14,7 @@ public class UserDto extends BaseDto {
     String name;
     String email;
     String phone;
-    Double dodoCoins;
+    Integer dodoCoins;
     String temp_password;
     String password;
 }

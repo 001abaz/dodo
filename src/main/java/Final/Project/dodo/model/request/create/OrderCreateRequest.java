@@ -1,6 +1,7 @@
 package Final.Project.dodo.model.request.create;
 
 
+import Final.Project.dodo.model.enums.PaymentType;
 import Final.Project.dodo.model.request.OrderProductRequest;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,6 @@ import java.util.List;
 public class OrderCreateRequest {
     List<OrderProductRequest> orderProductList;
     LocalDateTime orderDate;
-    Boolean paymentType;
-    Long userId;
+    PaymentType paymentType;
     Long addressId;
 }

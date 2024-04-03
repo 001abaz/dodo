@@ -11,6 +11,7 @@ import Final.Project.dodo.model.request.update.UserUpdateRequest;
 import Final.Project.dodo.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -26,13 +27,15 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserRep, UserDto, Use
         dto.setName(request.getName());
         dto.setEmail(request.getEmail());
         dto.setPhone(request.getPhone());
-        dto.setDodoCoins(request.getDodoCoins());
         return save(dto);
     }
 
     @Override
     public UserDto update(UserUpdateRequest request) {
         UserDto dto = new UserDto();
+
+        dto.setAddDate(LocalDateTime.now());
+
         dto.setId(request.getId());
         dto.setName(request.getName());
         dto.setEmail(request.getEmail());

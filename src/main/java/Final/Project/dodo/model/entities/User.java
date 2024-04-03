@@ -24,7 +24,7 @@ public class User extends BaseEntity {
     @Column(name = "phone")
     String phone;
     @Column(name = "dodo_coins")
-    Double dodoCoins;
+    Integer dodoCoins;
     @Column(name = "temp_password")
     String temp_password;
     @Column(name = "password")

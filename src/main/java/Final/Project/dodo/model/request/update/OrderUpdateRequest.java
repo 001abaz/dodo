@@ -1,6 +1,7 @@
 package Final.Project.dodo.model.request.update;
 
 import Final.Project.dodo.model.enums.OrderStatus;
+import Final.Project.dodo.model.enums.PaymentType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,10 +17,10 @@ import java.time.LocalDateTime;
 public class OrderUpdateRequest {
     Long id;
     BigDecimal totalPrice;
-    BigDecimal dodoCoins;
+    Integer dodoCoins;
     LocalDateTime orderDate;
     OrderStatus orderStatus;
-    Boolean paymentType;
+    PaymentType paymentType;
     BigDecimal discount;
     Long userId;
     Long addressId;
