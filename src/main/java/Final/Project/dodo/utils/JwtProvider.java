@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Component
@@ -20,16 +21,20 @@ public class JwtProvider {
     private String authKey;
 
     public String generateToken(Long userId) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, expiration);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expirationTime = now.plusMinutes(expiration);
+
+        Date issuedAt = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+        Date expirationDate = Date.from(expirationTime.atZone(ZoneId.systemDefault()).toInstant());
 
         return Jwts.builder()
-                .setIssuedAt(new Date())
-                .setExpiration(calendar.getTime())
+                .setIssuedAt(issuedAt)
+                .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, authKey)
                 .claim("userId", userId)
                 .compact();
     }
+
     public String generateAccessToken(Long userId) {
         return generateToken(userId);
     }
