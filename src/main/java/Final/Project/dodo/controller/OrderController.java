@@ -46,13 +46,13 @@ public class OrderController {
     }
 
     @GetMapping("getById")
-    public ResponseEntity<OrderDto> getById(@RequestParam Long id) {
+    public ResponseEntity<?> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping("HistoryOfOrder")
-    public ResponseEntity<?> getHistoryByUserId(@RequestHeader String token) {
-        return ResponseEntity.ok(service.getByUserId(token));
+    public ResponseEntity<?> getHistoryByUserId(@RequestHeader String token, int pageNum, int limit) {
+        return ResponseEntity.ok(service.getAllByUserId(token, pageNum, limit));
     }
 }
 

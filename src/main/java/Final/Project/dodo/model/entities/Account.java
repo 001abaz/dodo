@@ -5,22 +5,24 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Table(name="tb_user")
+@Table(name="tb_account")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User extends BaseEntity {
+public class Account extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
-    @Column(name = "name")
-    String name;
-    @Column(name = "phone")
-    String phone;
-    @Column(name = "dodo_coins")
-    Integer dodoCoins;
+    @Column(name = "email")
+    String email;
+    @Column(name = "temp_password")
+    String temp_password;
+    @Column(name = "tempPasswordTime")
+    LocalDateTime tempPasswordTime;
 }

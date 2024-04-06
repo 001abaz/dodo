@@ -38,5 +38,11 @@ public class UserController {
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return ResponseEntity.ok(service.delete(id));
     }
+
+    @GetMapping("UserInfo")
+    public ResponseEntity<?> getUserInfo(@RequestHeader String token){
+//        return service.getUserInfo(token);
+        return null;
+    }
 }
 
