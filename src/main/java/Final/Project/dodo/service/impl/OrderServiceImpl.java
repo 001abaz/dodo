@@ -16,6 +16,8 @@ import Final.Project.dodo.model.response.OrderHistoryResponse;
 import Final.Project.dodo.model.response.ProductListResponse;
 import Final.Project.dodo.service.*;
 import Final.Project.dodo.utils.JwtProvider;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,7 +27,9 @@ import java.util.List;
 
 @Service
 public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto, OrderMapper> implements OrderService {
-    public OrderServiceImpl(OrderRep rep, OrderMapper mapper, UserService userService, AddressService addressService, ProductSizeService productSizeService, OrderProductService orderProductService, JwtProvider jwtProvider) {
+    public OrderServiceImpl(OrderRep rep, OrderMapper mapper, UserService userService,
+                            AddressService addressService, ProductSizeService productSizeService,
+                            OrderProductService orderProductService, JwtProvider jwtProvider) {
         super(rep, mapper);
         this.userService = userService;
         this.addressService = addressService;
@@ -56,6 +60,7 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         dto.setUser(userDto);
         dto.setOrderDate(request.getOrderDate());
         dto.setPaymentType(request.getPaymentType());
+
         if (request.getOrderDate().plusMinutes(30).isAfter(LocalDateTime.now())) {
             dto.setOrderStatus(OrderStatus.NEW);
         } else {
@@ -63,14 +68,10 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         }
 
         for (OrderProductRequest r : request.getOrderProductList()) {
-            ProductSizeDto productSizeDto = productSizeService.findById(r.getProductSizeId());
-            if (productSizeDto == null) {
-                throw new NotFoundException("Product size not found for ID: " + r.getProductSizeId());
-            }
-            totalPrice = totalPrice.add(productSizeDto.getPrice());
+                totalPrice = totalPrice.add(r.getPrice());
         }
-        dodoCoins =  totalPrice.multiply(BigDecimal.valueOf(0.20)).intValue();
 
+        dodoCoins =  totalPrice.multiply(BigDecimal.valueOf(0.20)).intValue();
         dto.setTotalPrice(totalPrice);
         dto.setDodoCoins(dodoCoins);
 
@@ -81,7 +82,6 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         }
 
         OrderDto savedOrder = save(dto);
-
         userService.update(userDto);
 
         for (OrderProductRequest r : request.getOrderProductList()) {
@@ -115,14 +115,11 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         return update(dto);
     }
 
-    @Override
-    public Boolean delete(Long id) {
-        return delete(findById(id));
-    }
-
     public List<ProductListResponse> findByOrderId(Long id){
+
         List<ProductListResponse> productListResponses = new ArrayList<>();
        List<OrderProductDto> orderProductDtoList = orderProductService.findAllByOrderId(id);
+
        for (OrderProductDto orderProductDto: orderProductDtoList){
            ProductListResponse response = new ProductListResponse();
            response.setName(orderProductDto.getProduct().getName());
@@ -138,12 +135,13 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
     }
 
     @Override
-    public List<OrderHistoryResponse> getByUserId(String token) {
+    public List<OrderHistoryResponse> getAllByUserId(String token, int pageNum, int limit) {
         Long userId = jwtProvider.validateToken(token);
 
         List<OrderHistoryResponse> responseList = new ArrayList<>();
 
-        List<OrderListResponse> orderListResponseList =  rep.findByUserId(userId);
+        Page<OrderListResponse> page = rep.findByUserId(userId, PageRequest.of(pageNum, limit));
+        List<OrderListResponse> orderListResponseList = page.getContent();
 
         for (OrderListResponse r: orderListResponseList){
             OrderHistoryResponse response = new OrderHistoryResponse();
@@ -162,21 +160,38 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
     public OrderDto repeatOrder(String token, RepeatOrderRequest request) {
         jwtProvider.validateToken(token);
 
-        OrderDto dto = findById(request.getId());
-        OrderDto newDto = new OrderDto();
-        newDto.setUser(dto.getUser());
-        newDto.setTotalPrice(dto.getTotalPrice());
-        newDto.setDodoCoins(dto.getDodoCoins());
-        newDto.setOrderDate(request.getOrderDate());
-        newDto.setPaymentType(request.getPaymentType());
-        newDto.setAddress(addressService.findById(request.getAddressId()));
+        OrderDto oldDto = findById(request.getId());
+        OrderCreateRequest createRequest = new OrderCreateRequest();
 
-        if (newDto.getOrderDate().plusMinutes(30).isAfter(LocalDateTime.now())) {
-            newDto.setOrderStatus(OrderStatus.NEW);
-        } else {
-            newDto.setOrderStatus(OrderStatus.PREPARING);
+        createRequest.setOrderDate(oldDto.getOrderDate());
+        createRequest.setPaymentType(oldDto.getPaymentType());
+        createRequest.setAddressId(oldDto.getAddress().getId());
+        List<OrderProductDto> list = orderProductService.findAllByOrderId(oldDto.getId());
+        List<OrderProductRequest> orderProductList = new ArrayList<>();
+        for (OrderProductDto dto: list){
+            OrderProductRequest newRequest = new OrderProductRequest();
+            newRequest.setPrice(dto.getPrice());
+            orderProductList.add(newRequest);
         }
+        createRequest.setOrderProductList(orderProductList);
 
-        return save(newDto);
+        return create(token, createRequest);
+    }
+
+    @Override
+    public void checkNewOrders() {
+        List<OrderDto> orderList = mapper.toDtos(rep.findByOrderStatus(OrderStatus.NEW), context);
+        for (OrderDto dto: orderList) {
+            if ((dto.getUpdateDate().plusMinutes(30).isEqual(dto.getOrderDate())
+                || dto.getUpdateDate().plusMinutes(30).isBefore(dto.getOrderDate()))) {
+                dto.setOrderStatus(OrderStatus.PREPARING);
+                update(dto);
+            }
+        }
+    }
+
+    @Override
+    public Boolean delete(Long id) {
+        return delete(findById(id));
     }
 }

@@ -42,16 +42,13 @@ public class JwtProvider {
     public Long validateToken(String token) {
         try {
             Claims claims = Jwts.parser().setSigningKey(authKey).parseClaimsJws(token).getBody();
-            // Validate other aspects of the token (expiration, etc.) if necessary
             if (claims != null) {
                 return Long.parseLong(claims.get("userId").toString());
             } else {
                 throw new RuntimeException("Invalid token: Empty claims");
             }
         } catch (SignatureException e) {
-        // Log the exception details
         log.error("JWT signature mismatch error occurred: {}", e.getMessage(), e);
-        // Throw a more informative exception message
         throw new RuntimeException("JWT signature mismatch error occurred: " + e.getMessage(), e);
     } catch (ExpiredJwtException e) {
             throw new RuntimeException("Token expired. Please log in again.");

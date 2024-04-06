@@ -17,7 +17,9 @@ public interface OrderService extends BaseService<OrderDto> {
 
     Boolean delete(Long id);
 
-    List<OrderHistoryResponse> getByUserId(String token);
+    List<OrderHistoryResponse> getAllByUserId(String token, int pageNum, int limit);
 
     OrderDto repeatOrder(String token, RepeatOrderRequest request);
+
+    void checkNewOrders();
 }

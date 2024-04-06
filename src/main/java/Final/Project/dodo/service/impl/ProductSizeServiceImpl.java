@@ -13,9 +13,12 @@ import Final.Project.dodo.model.request.update.ProductSizeUpdateRequest;
 import Final.Project.dodo.service.ProductService;
 import Final.Project.dodo.service.ProductSizeService;
 import Final.Project.dodo.service.SizeService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ProductSizeServiceImpl extends BaseServiceImpl<ProductSize, ProductSizeRep, ProductSizeDto, ProductSizeMapper> implements ProductSizeService {
@@ -84,6 +87,13 @@ public class ProductSizeServiceImpl extends BaseServiceImpl<ProductSize, Product
         dto.setActive(response.getActive());
         dto.setStatus(Status.valueOf(response.getStatus()));
         return dto;
+    }
+
+    @Override
+    public List<ProductSizeDto> getProductSizes(Long sizeId, BigDecimal fromPrice, BigDecimal toPrice, String name, Long categoryId, Pageable pageable) {
+
+        return mapper.toDtos(rep.findByFilter(
+                sizeId, fromPrice, toPrice, name, categoryId, pageable).getContent(), context);
     }
 
 
