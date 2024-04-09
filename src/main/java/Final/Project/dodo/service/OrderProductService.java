@@ -8,8 +8,8 @@ import Final.Project.dodo.model.request.update.OrderProductUpdateRequest;
 import java.util.List;
 
 public interface OrderProductService extends BaseService<OrderProductDto> {
-    OrderProductDto create (OrderProductCreateRequest request);
-    OrderProductDto update(OrderProductUpdateRequest request);
-    Boolean delete(Long id);
-    List<OrderProductDto> findAllByOrderId(Long id);
+    String create (OrderProductCreateRequest request,Integer languageOrdinal);
+    OrderProductDto update(OrderProductUpdateRequest request,Integer languageOrdinal);
+    Boolean delete(Long id, Integer languageOrdinal);
+    List<OrderProductDto> findAllByOrderId(Long id, Integer languageOrdinal);
 }

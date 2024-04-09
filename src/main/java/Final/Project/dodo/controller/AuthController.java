@@ -18,21 +18,22 @@ public class AuthController {
 
 
     @PostMapping(name = "/auth")
-    ResponseEntity<?> auth(@RequestBody AuthRequest request){
-        return ResponseEntity.ok(authService.auth(request));
+    ResponseEntity<?> auth(@RequestBody AuthRequest request, @RequestParam(required = false) Integer languageOrdinal){
+        return ResponseEntity.ok(authService.auth(request, languageOrdinal));
     }
 
     @GetMapping("/check")
-    ResponseEntity<?> validate(@RequestParam() String email, String password){
+    ResponseEntity<?> validate(@RequestParam() String email, String password,
+                               @RequestParam(required = false) Integer languageOrdinal){
         ValidateEmailReq emailReq = new ValidateEmailReq();
         emailReq.setEmail(email);
         emailReq.setPassword(password);
-        return ResponseEntity.ok(authService.validate(emailReq));
+        return ResponseEntity.ok(authService.validate(emailReq, languageOrdinal));
     }
 
     @GetMapping("/checkToken")
-    ResponseEntity<?> validateToken(@RequestParam() String token){
-        return ResponseEntity.ok(provider.validateToken(token));
+    ResponseEntity<?> validateToken(@RequestParam() String token, Integer languageOrdinal){
+        return ResponseEntity.ok(provider.validateToken(token, languageOrdinal));
     }
 
     @GetMapping("/getClaim")

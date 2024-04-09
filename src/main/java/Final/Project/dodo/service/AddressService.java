@@ -6,12 +6,15 @@ import Final.Project.dodo.model.dto.AddressDto;
 import Final.Project.dodo.model.request.create.AddressCreateRequest;
 import Final.Project.dodo.model.request.update.AddressUpdateRequest;
 
+import java.util.List;
+
 public interface AddressService extends BaseService<AddressDto> {
-    AddressDto create(AddressCreateRequest request);
+    String create(AddressCreateRequest request, Integer languageOrdinal);
 
-    AddressDto update(AddressUpdateRequest request);
+    AddressDto update(AddressUpdateRequest request, Integer languageOrdinal);
 
-    Boolean delete(Long id);
+    Boolean delete(Long id, Integer languageOrdinal);
 
     AddressResponse findByAddressId(Long id);
+    List<AddressResponse> findAllByUserId(String token);
 }

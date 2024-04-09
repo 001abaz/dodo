@@ -16,8 +16,8 @@ public class CategoriesController {
     private final CategoriesService service;
 
     @PostMapping("save")
-    public ResponseEntity<?> save(@RequestBody CategoriesCreateRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<?> save(@RequestBody CategoriesCreateRequest request, Integer languageOrdinal) {
+        return ResponseEntity.ok(service.create(request, languageOrdinal));
     }
 
     @PostMapping("update")
@@ -31,13 +31,13 @@ public class CategoriesController {
     }
 
     @GetMapping("getById")
-    public ResponseEntity<?> getById(@RequestParam Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<?> getById(@RequestParam Long id,@RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.findById(id, languageOrdinal));
     }
 
     @DeleteMapping("delete")
-    public ResponseEntity<?> delete(@RequestParam Long id) {
-        return ResponseEntity.ok(service.delete(id));
+    public ResponseEntity<?> delete(@RequestParam Long id,@RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.delete(id, languageOrdinal));
     }
 }
 

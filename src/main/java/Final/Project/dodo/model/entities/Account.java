@@ -23,6 +23,9 @@ public class Account extends BaseEntity {
     String email;
     @Column(name = "temp_password")
     String temp_password;
-    @Column(name = "tempPasswordTime")
+    @Column(name = "temp_password_time")
     LocalDateTime tempPasswordTime;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    User user;
 }

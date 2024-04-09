@@ -1,6 +1,10 @@
 package Final.Project.dodo.base;
 
+import Final.Project.dodo.exception.DeleteException;
+import Final.Project.dodo.exception.NotFoundException;
 import Final.Project.dodo.model.enums.Status;
+import Final.Project.dodo.utils.Language;
+import Final.Project.dodo.utils.ResourceBundleLanguage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.MappedSuperclass;
@@ -31,8 +35,9 @@ public abstract class BaseServiceImpl<E extends BaseEntity,
     }
 
     @Override
-    public D findById(Long id) {
-        return mapper.toDto(rep.findById(id).orElseThrow(()->new RuntimeException("fjfjjf")),context);
+    public D findById(Long id, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
+        return mapper.toDto(rep.findById(id).orElseThrow(()->new NotFoundException(ResourceBundleLanguage.periodMessage(language, "objectNotFound"))), context);
     }
 
     @Override
@@ -47,13 +52,14 @@ public abstract class BaseServiceImpl<E extends BaseEntity,
     }
 
     @Override
-    public boolean delete(D e) {
+    public boolean delete(D e, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
         try {
             e.setStatus(Status.DELETE);
             save(e);
             return true;
-        }catch (Exception ex){
-            throw new RuntimeException("Не удалось удалить объект");
+        }catch (DeleteException ex){
+            throw new DeleteException(ResourceBundleLanguage.periodMessage(language,""));
         }
 
 

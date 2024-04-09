@@ -1,5 +1,6 @@
 package Final.Project.dodo.utils;
 
+import Final.Project.dodo.exception.AuthException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,33 +35,29 @@ public class JwtProvider {
                 .claim("userId", userId)
                 .compact();
     }
-
     public String generateAccessToken(Long userId) {
         return generateToken(userId);
     }
 
-    public Long validateToken(String token) {
+    public Long validateToken(String token, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
         try {
             Claims claims = Jwts.parser().setSigningKey(authKey).parseClaimsJws(token).getBody();
             if (claims != null) {
                 return Long.parseLong(claims.get("userId").toString());
             } else {
-                throw new RuntimeException("Invalid token: Empty claims");
+                throw new AuthException(ResourceBundleLanguage.periodMessage(language,""));
             }
         } catch (SignatureException e) {
-        log.error("JWT signature mismatch error occurred: {}", e.getMessage(), e);
-        throw new RuntimeException("JWT signature mismatch error occurred: " + e.getMessage(), e);
+        throw new AuthException("Invalid token");
     } catch (ExpiredJwtException e) {
-            throw new RuntimeException("Token expired. Please log in again.");
+            throw new AuthException("Token expired. Please log in again.");
         } catch (MalformedJwtException e) {
-            throw new RuntimeException("Malformed token.");
+            throw new AuthException("Malformed token.");
         } catch (Exception e) {
-            throw new RuntimeException("Failed to validate token: " + e.getMessage());
+            throw new AuthException("Failed to validate token: " + e.getMessage());
         }
-
-
     }
-
     public String getClaim(String token) {
         try {
             int i = token.lastIndexOf('.');

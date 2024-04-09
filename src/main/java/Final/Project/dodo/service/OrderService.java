@@ -11,15 +11,17 @@ import java.util.List;
 
 
 public interface OrderService extends BaseService<OrderDto> {
-    OrderDto create(String accessToken ,OrderCreateRequest request);
+    String create(String accessToken ,OrderCreateRequest request, Integer languageOrdinal);
 
-    OrderDto update(OrderUpdateRequest request);
+    OrderDto update(OrderUpdateRequest request, Integer languageOrdinal);
 
-    Boolean delete(Long id);
+    Boolean delete(Long id, Integer languageOrdinal);
 
-    List<OrderHistoryResponse> getAllByUserId(String token, int pageNum, int limit);
+    List<OrderHistoryResponse> getAllByUserId(String token, int pageNum, int limit, Integer languageOrdinal);
 
-    OrderDto repeatOrder(String token, RepeatOrderRequest request);
+    List<OrderHistoryResponse> getAllByUserId(String token, Integer languageOrdinal);
+
+    String repeatOrder(String token, RepeatOrderRequest request, Integer languageOrdinal);
 
     void checkNewOrders();
 }

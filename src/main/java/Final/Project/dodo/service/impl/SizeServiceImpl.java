@@ -34,7 +34,7 @@ public class SizeServiceImpl extends BaseServiceImpl<Size, SizeRep, SizeDto, Siz
     }
 
     @Override
-    public Boolean delete(Long id) {
-        return delete(findById(id));
+    public Boolean delete(Long id, Integer languageOrdinal) {
+        return delete(findById(id, languageOrdinal), languageOrdinal);
     }
 }

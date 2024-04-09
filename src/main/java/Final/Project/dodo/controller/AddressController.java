@@ -15,13 +15,13 @@ public class AddressController {
     private final AddressService service;
 
     @PostMapping("save")
-    public ResponseEntity<?> save(@RequestBody AddressCreateRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<?> save(@RequestBody AddressCreateRequest request ,@RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.create(request , languageOrdinal));
     }
 
     @PostMapping("update")
-    public ResponseEntity<?> update(@RequestBody AddressUpdateRequest request) {
-        return ResponseEntity.ok(service.update(request));
+    public ResponseEntity<?> update(@RequestBody AddressUpdateRequest request,@RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.update(request, languageOrdinal));
     }
 
     @GetMapping("getAll")
@@ -30,12 +30,12 @@ public class AddressController {
     }
 
     @GetMapping("getById")
-    public ResponseEntity<?> getById(@RequestParam Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<?> getById(@RequestParam Long id,@RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.findById(id, languageOrdinal));
     }
 
     @DeleteMapping("delete")
-    public ResponseEntity<?> delete(@RequestParam Long id) {
-        return ResponseEntity.ok(service.delete(id));
+    public ResponseEntity<?> delete(@RequestParam Long id,@RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.delete(id, languageOrdinal));
     }
 }

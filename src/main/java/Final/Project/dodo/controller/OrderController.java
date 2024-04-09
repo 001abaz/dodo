@@ -21,23 +21,27 @@ public class OrderController {
 
     @PostMapping("save")
     public ResponseEntity<?> save(@RequestHeader String accessToken,
-            @RequestBody OrderCreateRequest request) {
-        return ResponseEntity.ok(service.create(accessToken, request));
+                                  @RequestBody OrderCreateRequest request,
+                                  @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.create(accessToken, request, languageOrdinal));
     }
     @PostMapping("repeatOrder")
     public ResponseEntity<?> repeatOrder(@RequestHeader String accessToken,
-                                  @RequestBody RepeatOrderRequest request) {
-        return ResponseEntity.ok(service.repeatOrder(accessToken, request));
+                                         @RequestBody RepeatOrderRequest request,
+                                         @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.repeatOrder(accessToken, request, languageOrdinal));
     }
 
     @PostMapping("update")
-    public ResponseEntity<?> update(@RequestBody OrderUpdateRequest request) {
-        return ResponseEntity.ok(service.update(request));
+    public ResponseEntity<?> update(@RequestBody OrderUpdateRequest request,
+                                    @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.update(request, languageOrdinal));
     }
 
     @DeleteMapping("delete")
-    public ResponseEntity<?> delete(@RequestParam Long id) {
-        return ResponseEntity.ok(service.delete(id));
+    public ResponseEntity<?> delete(@RequestParam Long id,
+                                    @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.delete(id, languageOrdinal));
     }
 
     @GetMapping("getAll")
@@ -46,13 +50,15 @@ public class OrderController {
     }
 
     @GetMapping("getById")
-    public ResponseEntity<?> getById(@RequestParam Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<?> getById(@RequestParam Long id,
+                                     @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.findById(id, languageOrdinal));
     }
 
     @GetMapping("HistoryOfOrder")
-    public ResponseEntity<?> getHistoryByUserId(@RequestHeader String token, int pageNum, int limit) {
-        return ResponseEntity.ok(service.getAllByUserId(token, pageNum, limit));
+    public ResponseEntity<?> getHistoryByUserId(@RequestHeader String token, int pageNum, int limit,
+                                                @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.getAllByUserId(token, pageNum, limit, languageOrdinal));
     }
 }
 

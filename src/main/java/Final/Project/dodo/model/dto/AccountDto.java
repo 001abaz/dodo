@@ -15,4 +15,5 @@ public class AccountDto extends BaseDto {
     String email;
     String temp_password;
     LocalDateTime tempPasswordTime;
+    UserDto user;
 }

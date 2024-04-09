@@ -10,14 +10,14 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductSizeService extends BaseService<ProductSizeDto> {
-    ProductSizeDto create(ProductSizeCreateRequest request);
+    String create(ProductSizeCreateRequest request, Integer languageOrdinal);
 
-    ProductSizeDto update(ProductSizeUpdateRequest request);
+    ProductSizeDto update(ProductSizeUpdateRequest request, Integer languageOrdinal);
 
-    Boolean delete(Long id);
+    Boolean delete(Long id, Integer languageOrdinal);
 
     ProductSizeDto findByProductId(Long id);
-    ProductSizeDto findByProductIdAndSizeId(Long productId, Long sizeId);
+    ProductSizeDto findByProductIdAndSizeId(Long productId, Long sizeId, Integer languageOrdinal);
     List<ProductSizeDto> getProductSizes(Long sizeId, BigDecimal fromPrice, BigDecimal toPrice, String name, Long categoryId, Pageable pageable);
 
 }

@@ -25,8 +25,9 @@ public class SizeController {
         return ResponseEntity.ok(service.update(request));
     }
     @GetMapping("getById")
-    public ResponseEntity<?> getById(Long id){
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<?> getById(Long id,
+                                     @RequestParam(required = false) Integer languageOrdinal){
+        return ResponseEntity.ok(service.findById(id, languageOrdinal));
     }
     @GetMapping("getAll")
     public ResponseEntity<?> getAll(){
@@ -34,7 +35,8 @@ public class SizeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id){
-        return ResponseEntity.ok(service.delete(id));
+    public ResponseEntity<?> delete(@PathVariable Long id,
+                                    @RequestParam(required = false) Integer languageOrdinal){
+        return ResponseEntity.ok(service.delete(id, languageOrdinal));
     }
 }

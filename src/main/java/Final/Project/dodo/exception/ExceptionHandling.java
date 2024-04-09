@@ -21,16 +21,20 @@ public class ExceptionHandling {
 
         e.getAllErrors().forEach(err -> errorsList.add(err.getDefaultMessage()));
 
-        return new ResponseEntity(new Response(errorsList, e.getMessage()), HttpStatus.MULTI_STATUS);
+        return new ResponseEntity<>(new Response(errorsList, e.getMessage()), HttpStatus.MULTI_STATUS);
     }
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<?> exceptionHandle(NotFoundException e) {
-        return new ResponseEntity(new Response(null, e.getMessage()), HttpStatus.I_AM_A_TEAPOT);
+        return new ResponseEntity<>(new Response(null, e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<?> AuthException(AuthException a) {
+        return new ResponseEntity<>(new Response(null, a.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(EmptyListException.class)
-    public ResponseEntity<?> exceptionHandle(EmptyListException e) {
-        return new ResponseEntity(new Response(e, e.getMessage()), HttpStatus.I_AM_A_TEAPOT);
+    @ExceptionHandler(DeleteException.class)
+    public ResponseEntity<?> DeleteException(RuntimeException ex) {
+        return new ResponseEntity<>(new Response(null, ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

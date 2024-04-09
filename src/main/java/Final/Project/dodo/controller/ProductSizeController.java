@@ -19,23 +19,27 @@ public class ProductSizeController {
     private final ProductSizeService service;
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody ProductSizeCreateRequest request) {
-        return ResponseEntity.ok(service.create(request));
+    public ResponseEntity<?> create(@RequestBody ProductSizeCreateRequest request,
+                                    @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.create(request, languageOrdinal));
     }
 
     @PutMapping
-    public ResponseEntity<?> update(@RequestBody ProductSizeUpdateRequest request) {
-        return ResponseEntity.ok(service.update(request));
+    public ResponseEntity<?> update(@RequestBody ProductSizeUpdateRequest request,
+                                    @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.update(request ,languageOrdinal));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        return ResponseEntity.ok(service.delete(id));
+    public ResponseEntity<?> delete(@PathVariable Long id,
+                                    @RequestParam(required = false) Integer languageOrdinal) {
+        return ResponseEntity.ok(service.delete(id, languageOrdinal));
     }
 
     @GetMapping("getById")
-    public ResponseEntity<?> getById(Long id){
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<?> getById(Long id,
+                                     @RequestParam(required = false) Integer languageOrdinal){
+        return ResponseEntity.ok(service.findById(id, languageOrdinal));
     }
     @GetMapping("getAll")
     public ResponseEntity<?> getAll(){

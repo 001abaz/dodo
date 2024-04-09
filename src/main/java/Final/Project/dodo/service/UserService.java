@@ -6,13 +6,12 @@ import Final.Project.dodo.model.request.create.UserCreateRequest;
 import Final.Project.dodo.model.request.update.UserUpdateRequest;
 
 public interface UserService extends BaseService<UserDto> {
-    UserDto create(UserCreateRequest request);
+    String create(UserCreateRequest request, Integer languageOrdinal);
 
     UserDto update(UserUpdateRequest request);
 
-    Boolean delete(Long id);
-    Boolean checkByEmail(String email);
-    UserDto findByEmail(String email);
+    Boolean delete(Long id, Integer languageOrdinal);
+
 
 
 }

@@ -16,6 +16,8 @@ import Final.Project.dodo.model.response.OrderHistoryResponse;
 import Final.Project.dodo.model.response.ProductListResponse;
 import Final.Project.dodo.service.*;
 import Final.Project.dodo.utils.JwtProvider;
+import Final.Project.dodo.utils.Language;
+import Final.Project.dodo.utils.ResourceBundleLanguage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,33 +29,36 @@ import java.util.List;
 
 @Service
 public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto, OrderMapper> implements OrderService {
+
+    private final UserService userService;
+    private final AddressService addressService;
+    private final ProductSizeService productSizeService;
+    private final OrderProductService orderProductService;
+    private final JwtProvider jwtProvider;
+
     public OrderServiceImpl(OrderRep rep, OrderMapper mapper, UserService userService,
                             AddressService addressService, ProductSizeService productSizeService,
                             OrderProductService orderProductService, JwtProvider jwtProvider) {
         super(rep, mapper);
         this.userService = userService;
         this.addressService = addressService;
-
         this.productSizeService = productSizeService;
         this.orderProductService = orderProductService;
         this.jwtProvider = jwtProvider;
     }
-    private final UserService userService;
-    private final AddressService addressService;
-    private final ProductSizeService productSizeService;
-    private final OrderProductService orderProductService;
-    private final JwtProvider jwtProvider;
+
     @Override
-    public OrderDto create(String accessToken, OrderCreateRequest request) {
-        Long userId = jwtProvider.validateToken(accessToken);
+    public String create(String accessToken, OrderCreateRequest request, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
+        Long userId = jwtProvider.validateToken(accessToken, languageOrdinal);
         BigDecimal totalPrice = BigDecimal.ZERO;
         Integer dodoCoins;
 
-        AddressDto addressDto = addressService.findById(request.getAddressId());
+        AddressDto addressDto = addressService.findById(request.getAddressId(), languageOrdinal);
         if (addressDto == null) {
             throw new NotFoundException("Address not found for ID: " + request.getAddressId());
         }
-        UserDto userDto = userService.findById(userId);
+        UserDto userDto = userService.findById(userId, languageOrdinal);
 
         OrderDto dto = new OrderDto();
         dto.setAddress(addressDto);
@@ -68,7 +73,7 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         }
 
         for (OrderProductRequest r : request.getOrderProductList()) {
-                totalPrice = totalPrice.add(r.getPrice());
+            totalPrice = totalPrice.add(r.getPrice());
         }
 
         dodoCoins =  totalPrice.multiply(BigDecimal.valueOf(0.20)).intValue();
@@ -85,7 +90,7 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         userService.update(userDto);
 
         for (OrderProductRequest r : request.getOrderProductList()) {
-            ProductSizeDto productSizeDto = productSizeService.findById(r.getProductSizeId());
+            ProductSizeDto productSizeDto = productSizeService.findById(r.getProductSizeId(), languageOrdinal);
             if (productSizeDto == null) {
                 throw new NotFoundException("Product size not found for ID: " + r.getProductSizeId());
             }
@@ -95,16 +100,16 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
             orderProductDto.setOrder(savedOrder);
             orderProductService.save(orderProductDto);
         }
-        return savedOrder;
+        return ResourceBundleLanguage.periodMessage(language,"createSuccessful");
     }
 
 
     @Override
-    public OrderDto update(OrderUpdateRequest request) {
+    public OrderDto update(OrderUpdateRequest request, Integer languageOrdinal) {
         OrderDto dto = new OrderDto();
         dto.setId(request.getId());
-        dto.setUser(userService.findById(request.getUserId()));
-        dto.setAddress(addressService.findById(request.getAddressId()));
+        dto.setUser(userService.findById(request.getUserId(), languageOrdinal));
+        dto.setAddress(addressService.findById(request.getAddressId(), languageOrdinal));
         dto.setTotalPrice(request.getTotalPrice());
         dto.setOrderStatus(request.getOrderStatus());
         dto.setOrderDate(request.getOrderDate());
@@ -115,28 +120,28 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         return update(dto);
     }
 
-    public List<ProductListResponse> findByOrderId(Long id){
+    public List<ProductListResponse> findByOrderId(Long id, Integer languageOrdinal){
 
         List<ProductListResponse> productListResponses = new ArrayList<>();
-       List<OrderProductDto> orderProductDtoList = orderProductService.findAllByOrderId(id);
+        List<OrderProductDto> orderProductDtoList = orderProductService.findAllByOrderId(id, languageOrdinal);
 
-       for (OrderProductDto orderProductDto: orderProductDtoList){
-           ProductListResponse response = new ProductListResponse();
-           response.setName(orderProductDto.getProduct().getName());
-           response.setLogo(orderProductDto.getProduct().getLogo());
-           response.setId(orderProductDto.getProduct().getId());
-           response.setDescription(orderProductDto.getProduct().getDescription());
-           response.setCategoryName(orderProductDto.getProduct().getCategories().getName());
+        for (OrderProductDto orderProductDto: orderProductDtoList){
+            ProductListResponse response = new ProductListResponse();
+            response.setName(orderProductDto.getProduct().getName());
+            response.setLogo(orderProductDto.getProduct().getLogo());
+            response.setId(orderProductDto.getProduct().getId());
+            response.setDescription(orderProductDto.getProduct().getDescription());
+            response.setCategoryName(orderProductDto.getProduct().getCategories().getName());
 
 
-           productListResponses.add(response);
-       }
-       return productListResponses;
+            productListResponses.add(response);
+        }
+        return productListResponses;
     }
 
     @Override
-    public List<OrderHistoryResponse> getAllByUserId(String token, int pageNum, int limit) {
-        Long userId = jwtProvider.validateToken(token);
+    public List<OrderHistoryResponse> getAllByUserId(String token, int pageNum, int limit, Integer languageOrdinal) {
+        Long userId = jwtProvider.validateToken(token, languageOrdinal);
 
         List<OrderHistoryResponse> responseList = new ArrayList<>();
 
@@ -148,7 +153,7 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
             response.setOrderDate(r.getOrderDate());
             response.setNumOfOrder(r.getId());
             response.setTotalPrice(r.getTotalPrice());
-            response.setProductListResponse(findByOrderId(r.getId()));
+            response.setProductListResponse(findByOrderId(r.getId(), languageOrdinal));
             response.setAddressResponse(addressService.findByAddressId(r.getAddressId()));
             responseList.add(response);
         }
@@ -157,16 +162,35 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
     }
 
     @Override
-    public OrderDto repeatOrder(String token, RepeatOrderRequest request) {
-        jwtProvider.validateToken(token);
+    public List<OrderHistoryResponse> getAllByUserId(String token, Integer languageOrdinal) {
+        Long userId = jwtProvider.validateToken(token, languageOrdinal);
+        List<OrderHistoryResponse> responseList = new ArrayList<>();
+        List<OrderListResponse> list = rep.findByUserId(userId);
+        for (OrderListResponse r : list) {
+            OrderHistoryResponse response = new OrderHistoryResponse();
+            response.setOrderDate(r.getOrderDate());
+            response.setNumOfOrder(r.getId());
+            response.setTotalPrice(r.getTotalPrice());
+            response.setProductListResponse(findByOrderId(r.getId(), languageOrdinal));
+            response.setAddressResponse(addressService.findByAddressId(r.getAddressId()));
+            responseList.add(response);
+        }
 
-        OrderDto oldDto = findById(request.getId());
+        return responseList;
+    }
+
+    @Override
+    public String repeatOrder(String token, RepeatOrderRequest request, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
+        jwtProvider.validateToken(token, languageOrdinal);
+
+        OrderDto oldDto = findById(request.getId(), languageOrdinal);
         OrderCreateRequest createRequest = new OrderCreateRequest();
 
         createRequest.setOrderDate(oldDto.getOrderDate());
         createRequest.setPaymentType(oldDto.getPaymentType());
         createRequest.setAddressId(oldDto.getAddress().getId());
-        List<OrderProductDto> list = orderProductService.findAllByOrderId(oldDto.getId());
+        List<OrderProductDto> list = orderProductService.findAllByOrderId(oldDto.getId(), languageOrdinal);
         List<OrderProductRequest> orderProductList = new ArrayList<>();
         for (OrderProductDto dto: list){
             OrderProductRequest newRequest = new OrderProductRequest();
@@ -174,8 +198,9 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
             orderProductList.add(newRequest);
         }
         createRequest.setOrderProductList(orderProductList);
+        create(token, createRequest, languageOrdinal);
 
-        return create(token, createRequest);
+        return ResourceBundleLanguage.periodMessage(language,"createSuccessful");
     }
 
     @Override
@@ -183,15 +208,19 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, OrderRep, OrderDto,
         List<OrderDto> orderList = mapper.toDtos(rep.findByOrderStatus(OrderStatus.NEW), context);
         for (OrderDto dto: orderList) {
             if ((dto.getUpdateDate().plusMinutes(30).isEqual(dto.getOrderDate())
-                || dto.getUpdateDate().plusMinutes(30).isBefore(dto.getOrderDate()))) {
+                    || dto.getUpdateDate().plusMinutes(30).isBefore(dto.getOrderDate()))) {
                 dto.setOrderStatus(OrderStatus.PREPARING);
                 update(dto);
             }
         }
     }
+    // eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MTI1MDcwNzYsImV4cCI6NzExMjUwNzA3NiwidXNlcklkIjoxfQ.UfEUCt7TT-vOs77FVR1u-cFzzv2aiNFmA_HPqSdUm16pXdJHj2Wdf0kRSlyucQubA6W93duMSKY64JFO3VjU3Q
+
 
     @Override
-    public Boolean delete(Long id) {
-        return delete(findById(id));
+    public Boolean delete(Long id, Integer languageOrdinal) {
+        return delete(findById(id, languageOrdinal), languageOrdinal);
     }
 }
+
+

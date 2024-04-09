@@ -13,6 +13,8 @@ import Final.Project.dodo.model.request.update.ProductSizeUpdateRequest;
 import Final.Project.dodo.service.ProductService;
 import Final.Project.dodo.service.ProductSizeService;
 import Final.Project.dodo.service.SizeService;
+import Final.Project.dodo.utils.Language;
+import Final.Project.dodo.utils.ResourceBundleLanguage;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -32,57 +34,60 @@ public class ProductSizeServiceImpl extends BaseServiceImpl<ProductSize, Product
     private final SizeService sizeService;
 
     @Override
-    public ProductSizeDto create(ProductSizeCreateRequest request) {
+    public String create(ProductSizeCreateRequest request, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
         ProductSizeDto dto = new ProductSizeDto();
-        dto.setProduct(productService.findById(request.getProductId()));
-        dto.setSize(sizeService.findById(request.getSizeId()));
+        dto.setProduct(productService.findById(request.getProductId(), languageOrdinal));
+        dto.setSize(sizeService.findById(request.getSizeId(), languageOrdinal));
         dto.setPrice(request.getPrice());
         dto.setActive(request.getActive());
-        return save(dto);
+        save(dto);
+        return ResourceBundleLanguage.periodMessage(language,"createSuccessful");
     }
 
 
     @Override
-    public ProductSizeDto update(ProductSizeUpdateRequest request) {
-        ProductSizeDto dto = findById(request.getId());
+    public ProductSizeDto update(ProductSizeUpdateRequest request, Integer languageOrdinal) {
+        ProductSizeDto dto = findById(request.getId(), languageOrdinal);
 //        dto.setAddDate(dto.getAddDate());
         dto.setAddDate(LocalDateTime.now());
-        dto.setProduct(productService.findById(request.getProductId()));
-        dto.setSize(sizeService.findById(request.getSizeId()));
+        dto.setProduct(productService.findById(request.getProductId(), languageOrdinal));
+        dto.setSize(sizeService.findById(request.getSizeId(), languageOrdinal));
         dto.setPrice(request.getPrice());
         dto.setActive(request.getActive());
         return update(dto);
     }
 
     @Override
-    public Boolean delete(Long id) {
-        return delete(findById(id));
+    public Boolean delete(Long id, Integer languageOrdinal) {
+        return delete(findById(id, languageOrdinal), languageOrdinal);
     }
 
     @Override
     public ProductSizeDto findByProductId(Long id) {
-        return rep.findByProductId(id);
+        Language language = Language.getLanguage(null);
+        try {
+            return rep.findByProductId(id);
+        }catch (NotFoundException n){
+            throw new NotFoundException(ResourceBundleLanguage.periodMessage(language,"objectNotFound"));
+        }
     }
     @Override
-    public ProductSizeDto findByProductIdAndSizeId(Long productId, Long sizeId) {
-        // Check if productId or sizeId is null
+    public ProductSizeDto findByProductIdAndSizeId(Long productId, Long sizeId, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
         if (productId == null || sizeId == null) {
-            // Handle the case where productId or sizeId is null
-            // For example, you can throw an exception or return null
-            throw new IllegalArgumentException("productId and sizeId must not be null");
+            throw new NotFoundException(ResourceBundleLanguage.periodMessage(language, "objectNotFound"));
         }
 
         ProductSizeResponse response = rep.findByProductIdAndSizeId(productId, sizeId);
         if (response == null) {
-            // Handle the case where no record is found for the given productId and sizeId
-            // For example, you can throw an exception or return null
-            throw new NotFoundException("Product size not found for productId=" + productId + " and sizeId=" + sizeId);
+            throw new NotFoundException(ResourceBundleLanguage.periodMessage(language, "objectNotFound"));
         }
 
         ProductSizeDto dto = new ProductSizeDto();
         dto.setId(response.getId());
-        dto.setSize(sizeService.findById(sizeId));
-        dto.setProduct(productService.findById(productId));
+        dto.setSize(sizeService.findById(sizeId, languageOrdinal));
+        dto.setProduct(productService.findById(productId, languageOrdinal));
         dto.setPrice(response.getPrice());
         dto.setActive(response.getActive());
         dto.setStatus(Status.valueOf(response.getStatus()));
@@ -90,7 +95,9 @@ public class ProductSizeServiceImpl extends BaseServiceImpl<ProductSize, Product
     }
 
     @Override
-    public List<ProductSizeDto> getProductSizes(Long sizeId, BigDecimal fromPrice, BigDecimal toPrice, String name, Long categoryId, Pageable pageable) {
+    public List<ProductSizeDto> getProductSizes(Long sizeId, BigDecimal fromPrice,
+                                                BigDecimal toPrice, String name,
+                                                Long categoryId, Pageable pageable) {
 
         return mapper.toDtos(rep.findByFilter(
                 sizeId, fromPrice, toPrice, name, categoryId, pageable).getContent(), context);

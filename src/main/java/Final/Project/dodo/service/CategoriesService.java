@@ -6,9 +6,9 @@ import Final.Project.dodo.model.request.create.CategoriesCreateRequest;
 import Final.Project.dodo.model.request.update.CategoriesUpdateRequest;
 
 public interface CategoriesService extends BaseService<CategoriesDto> {
-    CategoriesDto create(CategoriesCreateRequest request);
+    String create(CategoriesCreateRequest request, Integer languageOrdinal);
 
     CategoriesDto update(CategoriesUpdateRequest request);
 
-    Boolean delete(Long id);
+    Boolean delete(Long id, Integer languageOrdinal);
 }

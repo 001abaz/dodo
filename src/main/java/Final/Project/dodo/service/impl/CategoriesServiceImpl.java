@@ -9,6 +9,8 @@ import Final.Project.dodo.model.mapper.CategoriesMapper;
 import Final.Project.dodo.model.request.create.CategoriesCreateRequest;
 import Final.Project.dodo.model.request.update.CategoriesUpdateRequest;
 import Final.Project.dodo.service.CategoriesService;
+import Final.Project.dodo.utils.Language;
+import Final.Project.dodo.utils.ResourceBundleLanguage;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,11 +22,13 @@ public class CategoriesServiceImpl extends BaseServiceImpl<Categories, Categorie
     }
 
     @Override
-    public CategoriesDto create(CategoriesCreateRequest request) {
+    public String create(CategoriesCreateRequest request, Integer languageOrdinal ) {
+        Language language = Language.getLanguage(languageOrdinal);
         CategoriesDto dto = new CategoriesDto();
         dto.setName(request.getName());
         dto.setDefinition(request.getDefinition());
-        return save(dto);
+        save(dto);
+        return ResourceBundleLanguage.periodMessage(language,"createSuccessful");
     }
 
 
@@ -38,7 +42,7 @@ public class CategoriesServiceImpl extends BaseServiceImpl<Categories, Categorie
     }
 
     @Override
-    public Boolean delete(Long id) {
-        return delete(findById(id));
+    public Boolean delete(Long id, Integer languageOrdinal) {
+        return delete(findById(id, languageOrdinal), languageOrdinal);
     }
 }

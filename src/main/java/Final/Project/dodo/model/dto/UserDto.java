@@ -12,9 +12,6 @@ import lombok.experimental.FieldDefaults;
 @ToString
 public class UserDto extends BaseDto {
     String name;
-    String email;
     String phone;
     Integer dodoCoins;
-    String temp_password;
-    String password;
 }

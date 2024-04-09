@@ -1,16 +1,22 @@
 package Final.Project.dodo.service.impl;
 
+import Final.Project.dodo.exception.AuthException;
+import Final.Project.dodo.model.dto.AccountDto;
 import Final.Project.dodo.model.dto.UserDto;
 import Final.Project.dodo.model.enums.Status;
 import Final.Project.dodo.model.request.authRequest.AuthRequest;
 import Final.Project.dodo.model.request.authRequest.ValidateEmailReq;
+import Final.Project.dodo.service.AccountService;
 import Final.Project.dodo.service.AuthService;
 import Final.Project.dodo.service.UserService;
 import Final.Project.dodo.utils.JwtProvider;
+import Final.Project.dodo.utils.Language;
+import Final.Project.dodo.utils.ResourceBundleLanguage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -20,10 +26,11 @@ import java.util.Random;
 public class AuthServiceImpl implements AuthService {
     private final MailService mailService;
 
-    public AuthServiceImpl(MailService mailService, UserService userService, JwtProvider jwtProvider) {
+    public AuthServiceImpl(MailService mailService, UserService userService, JwtProvider jwtProvider, AccountService accountService) {
         this.mailService = mailService;
         this.userService = userService;
         this.jwtProvider = jwtProvider;
+        this.accountService = accountService;
     }
 
     @Value("${spring.mail.username}")
@@ -31,7 +38,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
-    private Date sendDate;
+    private final AccountService accountService;
+
 
     public static String generateTempPassword() {
         Random random = new Random();
@@ -41,58 +49,71 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String auth(AuthRequest request) {
+    public String auth(AuthRequest request, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
         String tempPassword = generateTempPassword();
-        // Send email and set sendDate
-        sendDate = mailService.send(request.getEmail(), tempPassword).getSentDate();
+        Date date = mailService.send(request.getEmail(), tempPassword).getSentDate();
+        Instant instant = date.toInstant();
+        LocalDateTime sendDate = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
 
-        if (userService.checkByEmail(request.getEmail())) {
-            UserDto dto = userService.findByEmail(request.getEmail());
-
-            dto.setTemp_password(tempPassword);
-            userService.update(dto);
-            return "Sign in is successful";
+        AccountDto accountDto = accountService.findByEmail(request.getEmail(), languageOrdinal);
+//        UserDto userDto = userService.findById(accountDto.getUser().getId(), languageOrdinal);
+        if (accountDto != null) {
+            accountDto.setTemp_password(tempPassword);
+            accountDto.setTempPasswordTime(sendDate);
+            accountService.update(accountDto);
+            return (ResourceBundleLanguage.periodMessage(language, "singInIsSuccessful"));
         } else {
             UserDto newUser = new UserDto();
+            AccountDto newAccount = new AccountDto();
 //            String text = "517-123";
 
             ValidateEmailReq req = new ValidateEmailReq();
             req.setEmail(request.getEmail());
             req.setPassword(tempPassword);
 
-            newUser.setTemp_password(tempPassword);
             newUser.setPhone(request.getPhone());
             newUser.setName(request.getName());
-            newUser.setEmail(request.getEmail());
             userService.save(newUser);
-            return validate(req);
+
+            newAccount.setTemp_password(tempPassword);
+            newAccount.setEmail(request.getEmail());
+            newAccount.setTempPasswordTime(sendDate);
+            newAccount.setUser(newUser);
+            accountService.save(newAccount);
+
+            return validate(req, languageOrdinal);
         }
     }
 
-    public boolean checkTime(Date date) {
-        if (date == null) {
+    public boolean checkTime(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
             return false;
         }
+
         LocalDateTime currentTime = LocalDateTime.now();
-        Duration duration = Duration.between(date.toInstant(), currentTime.atZone(ZoneId.systemDefault()).toInstant());
-        return duration.toMinutes() < 10;
+        Duration duration = Duration.between(localDateTime, currentTime);
+        long minutesDifference = duration.toMinutes();
+        return minutesDifference < 10;
     }
 
     @Override
-    public String validate(ValidateEmailReq request) {
-        UserDto dto = userService.findByEmail(request.getEmail());
+    public String validate(ValidateEmailReq request, Integer languageOrdinal) {
+        Language language = Language.getLanguage(languageOrdinal);
+        AccountDto dto = accountService.findByEmail(request.getEmail(), languageOrdinal);
 //         catch (ExpiredJwtException e) {
 //            throw new RuntimeException("Token expiration. Please authenticate again.");
 //        }
         if (dto.getTemp_password().equals(request.getPassword())) {
-            if (checkTime(sendDate)) {
+            if (checkTime(dto.getTempPasswordTime())) {
                 dto.setStatus(Status.APPROVED);
                 return jwtProvider.generateAccessToken(dto.getId());
             } else {
-                return "Time expired";
+                throw new AuthException(ResourceBundleLanguage.periodMessage(language, "timeExpired"));
             }
         } else {
-            return "Invalid password";
+            throw new AuthException (ResourceBundleLanguage.periodMessage(language, "invalidPassword"));
+
         }
     }
 }
